@@ -64,16 +64,36 @@ E_length = round(a[1], 2) # on average, 4.78 moves to reach the end.
 # before the end of the game, that is: F[1, 6]. In the code
 # is F[1, 4], considering the the rows/columns deleted for the
 # redundant states.
-p_6 = F[1, 4]
+b_P = P
 
-p_6
+b_P[ , 4] = P[ , 5]
+b_P[ , 5] = P[ , 4]
+b_P[4,  ] = P[5,  ]
+b_P[5,  ] = 0
+b_P[5, 5] = 1
+
+b_P
+
+b_Q = b_P[1:4, 1:4]
+b_R = b_P[1:(nrow(b_P)-2), (nrow(b_P) - 1) : (nrow(b_P))]
+b_I = diag(nrow(b_Q))
+
+# compute the fundamental matrix
+b_F = solve(b_I - b_Q)
+
+b_absorb_prob = b_F %*% b_R
+
+# state 1 is now our 1st state in the b_F matrix
+# state 6 is now our 1st state in the b_R matrix
+
+b_absorb_prob[1, 1]
 
 
 # c) To find the probability of the square landing on square 3, starting from
 # square 6, we need to make 3 an absorbing state and then find the probability
 # that from the transient state 6 the chain is absorbed in state 3. (F*R)
 
-new_P = matrix(0, nrow = 6, ncol = 6)
+c_P = matrix(0, nrow = 6, ncol = 6)
 
 for (i in 1:6) {
   new_i = i
@@ -85,29 +105,31 @@ for (i in 1:6) {
     if (1 < j && j < 5) {
       new_j = j + 1
     }
-    new_P[i, j] = P[new_i, new_j]
+    c_P[i, j] = P[new_i, new_j]
   }
 }
 
-new_P[1, 5] = P[1, 2]
+c_P[1, 5] = P[1, 2]
 for (i in 2:4) {
-  new_P[i, 5] = P[i + 1, 2]
+  c_P[i, 5] = P[i + 1, 2]
 }
-new_P[5, ] = 0
-new_P[5, 5] = 1
+c_P[5, ] = 0
+c_P[5, 5] = 1
 
-new_Q = new_P[1:4, 1:4]
-new_R = new_P[1:(nrow(new_P)-2), (nrow(new_P) - 1) : (nrow(new_P))]
-new_I = diag(nrow(new_Q))
+c_P
+
+c_Q = c_P[1:4, 1:4]
+c_R = c_P[1:(nrow(c_P)-2), (nrow(c_P) - 1) : (nrow(c_P))]
+c_I = diag(nrow(c_Q))
 
 # compute the fundamental matrix
-new_F = solve(new_I - new_Q)
+c_F = solve(c_I - c_Q)
 
-absorb_prob = new_F %*% new_R
+c_absorb_prob = c_F %*% c_R
 
 # state 6 is now our 3rd state in the new_F matrix
 # state 3 is now our 1st state in the new_R matrix
 
-absorb_prob[3, 1]
+c_absorb_prob[3, 1]
     
     
