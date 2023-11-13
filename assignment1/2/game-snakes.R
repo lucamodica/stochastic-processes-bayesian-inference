@@ -45,11 +45,6 @@ I = diag(nrow(Q))
 # compute the fundamental matrix
 F = solve(I - Q)
 
-print("P:"); P
-print("Q:"); Q
-print("R:"); R
-print("I:"); I
-
 
 # a) Expected number of steps to end the game
 # (i.e. the expected number of steps to reach the absorbing state)
@@ -131,5 +126,37 @@ c_absorb_prob = c_F %*% c_R
 # state 3 is now our 1st state in the new_R matrix
 
 c_absorb_prob[3, 1]
+
+
     
-    
+# (d) very answers to (a,b,c) using simulations
+# simulation for (a)
+# start with counter = 0
+init <- c(1,rep(0,5))
+# compute the average number of steps 
+# by doing 1000 simulations, each of them
+# with 100 steps random walk
+steps = c()
+for (i in 1:1000){
+  simA <- markov(init,P,100)
+  steps <- c(steps, length(simA[simA < 6]))
+}
+print(paste("Average number of steps to reach the end of the game: ", mean(steps)))
+
+# simulation for (b)
+land_in_6 = c()
+for (i in 1:1000){
+  simB <- markov(init,P,100)
+  land_in_6 <- c(land_in_6, ifelse(4 %in% simB[simB < 6], 1, 0))
+}
+print(paste("Probability that the counter will land on square 6 before the end of the game: ", sum(land_in_6)/length(land_in_6)))
+
+# simulation for (c)
+# change the init, since the counter will start in square 6
+init <- c(0, 0, 0, 1, 0, 0)
+land_in_3 = c()
+for (i in 1:1000){
+  simC <- markov(init,P,100)
+  land_in_3 <- c(land_in_3, ifelse(2 %in% simC[simC < 6], 1, 0))
+}
+print(paste("Probability that the counter will land on square 6 before the end of the game: ", sum(land_in_3)/length(land_in_3)))
