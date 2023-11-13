@@ -159,4 +159,4 @@ for (i in 1:1000){
   simC <- markov(init,P,100)
   land_in_3 <- c(land_in_3, ifelse(2 %in% simC[simC < 6], 1, 0))
 }
-print(paste("Probability that the counter will land on square 6 before the end of the game: ", sum(land_in_3)/length(land_in_3)))
+print(paste("Probability that the counter will land on square 3 before the end of the game, with the counter starting from 6: ", sum(land_in_3)/length(land_in_3)))
