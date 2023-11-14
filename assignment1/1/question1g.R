@@ -41,8 +41,9 @@ for (i in 1:n_sim) {
 }
 
 # Create histogram of the simulated times
-hist(simulated_times, breaks = 50, main = "Histogram of Simulated Failure Times",
+plot = hist(simulated_times, breaks = 50, main = "Histogram of Simulated Failure Times",
      xlab = "Failure Time", xlim = c(0, 5))
+print(plot)
 
 # Calculate the probability P(1 < X6 < 2 | x)
 prob_between_1_and_2 <- mean(simulated_times > 1 & simulated_times < 2)
