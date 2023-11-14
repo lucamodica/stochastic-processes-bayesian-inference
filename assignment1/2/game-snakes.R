@@ -1,7 +1,23 @@
+# Simulates n steps of a Markov chain 
+# markov(init,mat,n,states)
+# Generates X0, ..., Xn for a Markov chain with initiial
+#  distribution init and transition matrix mat
+# Labels can be a character vector of states; default is 1, .... k
+markov <- function(init,mat,n,labels) { 
+	if (missing(labels)) labels <- 1:length(init)
+  simlist <- numeric(n+1)
+  states <- 1:length(init)
+  simlist[1] <- sample(states,1,prob=init)
+  for (i in 2:(n+1)) 
+    simlist[i] <- sample(states,1,prob=mat[simlist[i-1],])
+    
+  # returns the states taken in the random walk
+  labels[simlist]
+}
+
 # init transition matrix
 num_squares = 9
 P = matrix(0, nrow = 9, ncol = 9)
-
 # Populate the transition matrix
 for (i in 1:(num_squares - 1)) {
   for (roll in 1:4) {
@@ -24,7 +40,6 @@ for (i in 1:(num_squares - 1)) {
     P[i, new_position] <- P[i, new_position] + 0.25
   }
 }
-
 for (i in 1:9) {
   P[2, i] = P[7, i]
   P[5, i] = P[3, i]
@@ -33,12 +48,9 @@ for (i in 1:9) {
 
 # remove the unnecessary rows and columns
 P = P[-c(2, 5, 8), -c(2, 5, 8)]
-
-
 # Set the last square as an absorbing state
 # (it's the last cell of the game)
 P[nrow(P), nrow(P)] = 1
-
 Q = P[-nrow(P), -nrow(P)]
 R = P[1:nrow(P)-1, nrow(P)]
 I = diag(nrow(Q))
@@ -46,50 +58,36 @@ I = diag(nrow(Q))
 F = solve(I - Q)
 
 
-# a) Expected number of steps to end the game
-# (i.e. the expected number of steps to reach the absorbing state)
+# question a)
 a = F %*% rep(1, nrow(F))
 # in our case, the expected length of the game corresponds
 # to a[1]; in other words, the expected number of steps
 # to reach the absorbing state from the initial state
 E_length = round(a[1], 2) # on average, 4.78 moves to reach the end.
+print(paste("COMPUTED: average number of steps to reach the end of the game: ", E_length))
 
 
-# b) probability that the counter will land on square 6 
-# before the end of the game, that is: F[1, 6]. In the code
-# is F[1, 4], considering the the rows/columns deleted for the
-# redundant states.
+# question b)
 b_P = P
-
+# change P to make the the state 6 an absorbing state
 b_P[ , 4] = P[ , 5]
 b_P[ , 5] = P[ , 4]
 b_P[4,  ] = P[5,  ]
 b_P[5,  ] = 0
 b_P[5, 5] = 1
 
-b_P
-
 b_Q = b_P[1:4, 1:4]
 b_R = b_P[1:(nrow(b_P)-2), (nrow(b_P) - 1) : (nrow(b_P))]
 b_I = diag(nrow(b_Q))
-
-# compute the fundamental matrix
 b_F = solve(b_I - b_Q)
-
 b_absorb_prob = b_F %*% b_R
-
-# state 1 is now our 1st state in the b_F matrix
-# state 6 is now our 1st state in the b_R matrix
-
-b_absorb_prob[1, 1]
+b_absorb_prob_6 = b_absorb_prob[1, 1]
+print(paste("COMPUTED: probability that the counter will land on square 6 before the end of the game: ", round(b_absorb_prob_6, 3)))
 
 
-# c) To find the probability of the square landing on square 3, starting from
-# square 6, we need to make 3 an absorbing state and then find the probability
-# that from the transient state 6 the chain is absorbed in state 3. (F*R)
-
+# question c)
+# reconstruct the transition matrix to make the state 3 an absorbing state
 c_P = matrix(0, nrow = 6, ncol = 6)
-
 for (i in 1:6) {
   new_i = i
   if (1 < i && i < 5) {
@@ -103,7 +101,6 @@ for (i in 1:6) {
     c_P[i, j] = P[new_i, new_j]
   }
 }
-
 c_P[1, 5] = P[1, 2]
 for (i in 2:4) {
   c_P[i, 5] = P[i + 1, 2]
@@ -111,27 +108,18 @@ for (i in 2:4) {
 c_P[5, ] = 0
 c_P[5, 5] = 1
 
-c_P
-
 c_Q = c_P[1:4, 1:4]
 c_R = c_P[1:(nrow(c_P)-2), (nrow(c_P) - 1) : (nrow(c_P))]
 c_I = diag(nrow(c_Q))
-
-# compute the fundamental matrix
 c_F = solve(c_I - c_Q)
-
 c_absorb_prob = c_F %*% c_R
-
-# state 6 is now our 3rd state in the new_F matrix
-# state 3 is now our 1st state in the new_R matrix
-
-c_absorb_prob[3, 1]
+c_absorb_prob_3 = c_absorb_prob[3, 1];
+print(paste("COMPUTED: probability that the counter will land on square 3 before the end of the game, with the counter starting from 6: ", round(c_absorb_prob_3, 3)))
 
 
     
-# (d) very answers to (a,b,c) using simulations
-# simulation for (a)
-# start with counter = 0
+# (d) verify answers to (a,b,c) using simulations
+# simulation for (a) start with counter = 0
 init <- c(1,rep(0,5))
 # compute the average number of steps 
 # by doing 1000 simulations, each of them
@@ -141,7 +129,7 @@ for (i in 1:1000){
   simA <- markov(init,P,100)
   steps <- c(steps, length(simA[simA < 6]))
 }
-print(paste("Average number of steps to reach the end of the game: ", mean(steps)))
+print(paste("SIMULATION: average number of steps to SIMULATION: reach the end of the game: ", mean(steps)))
 
 # simulation for (b)
 land_in_6 = c()
@@ -149,7 +137,7 @@ for (i in 1:1000){
   simB <- markov(init,P,100)
   land_in_6 <- c(land_in_6, ifelse(4 %in% simB[simB < 6], 1, 0))
 }
-print(paste("Probability that the counter will land on square 6 before the end of the game: ", sum(land_in_6)/length(land_in_6)))
+print(paste("SIMULATION: probability that the counter will land on square 6 before the end of the game: ", sum(land_in_6)/length(land_in_6)))
 
 # simulation for (c)
 # change the init, since the counter will start in square 6
@@ -159,4 +147,4 @@ for (i in 1:1000){
   simC <- markov(init,P,100)
   land_in_3 <- c(land_in_3, ifelse(2 %in% simC[simC < 6], 1, 0))
 }
-print(paste("Probability that the counter will land on square 3 before the end of the game, with the counter starting from 6: ", sum(land_in_3)/length(land_in_3)))
+print(paste("SIMULATION: probability that the counter will land on square 3 before the end of the game, with the counter starting from 6: ", sum(land_in_3)/length(land_in_3)))
