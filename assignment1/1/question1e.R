@@ -1,4 +1,5 @@
 library(ggplot2)
+library(stats)
 
 # Data and parameters
 data <- c(0.66, 2.30, 1.98, 1.49, 0.62)
@@ -8,13 +9,13 @@ b <- 5      # upper bound for uniform prior
 theta_values <- seq(a, b, length.out = 1000)  # Discretize theta space
 
 # Uniform prior
-prior <- rep(1 / (b - a), length(theta_values))
+prior <- dunif(theta_values, min = a, max = b)
 
 # Weibull likelihood function
 likelihood_weibull <- function(x, theta) {
   if (theta <= 0) return(0)
   lambda <- sqrt(theta)  # Scale parameter
-  (kappa / lambda) * (x / lambda)^(kappa - 1) * exp(-(x / lambda)^kappa)
+  return(dweibull(x, shape = kappa, scale = lambda))
 }
 
 # Compute the posterior for each theta

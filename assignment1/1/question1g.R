@@ -4,13 +4,13 @@ kappa <- 2
 a <- 0
 b <- 5
 theta_values <- seq(a, b, length.out = 1000)
-prior <- rep(1/(b - a), length(theta_values)) # Uniform prior
+prior <- dunif(theta_values, min = a, max = b)
 
 # Compute the Weibull likelihood
 likelihood_weibull <- function(x, theta) {
   if (theta <= 0) return(0)
   lambda <- sqrt(theta)
-  (kappa / lambda) * (x / lambda)^(kappa - 1) * exp(-(x / lambda)^kappa)
+  return(dweibull(x, shape = kappa, scale = lambda))
 }
 
 # Compute the posterior

@@ -1,8 +1,9 @@
 
 # Load required library
+#install.packages('MCMCpack')
 #install.packages('ggplot2')
 #install.packages('stats')
-
+library(MCMCpack)
 library(ggplot2)
 library(stats)
 
@@ -17,16 +18,11 @@ beta_prior <- 1
 alpha_post <- alpha_prior + length(data)
 beta_post <- beta_prior + sum(data^2)
 
-# Function to compute the density of the inverse gamma distribution
-dinv_gamma <- function(theta, alpha, beta) {
-  return((beta^alpha) / gamma(alpha) * theta^(-alpha - 1) * exp(-beta / theta))
-}
-
 # Generating a sequence of theta values for plotting
 theta_values <- seq(0.01, 10, length.out = 1000)
 
 # Calculating the posterior density for each theta value
-posterior_density <- dinv_gamma(theta_values, alpha_post, beta_post)
+posterior_density <- dinvgamma(x = theta_values, shape = alpha_post, scale = beta_post)
 
 # Creating a data frame for plotting
 posterior_data <- data.frame(theta = theta_values, density = posterior_density)
@@ -37,5 +33,4 @@ posterior_plot <- ggplot(posterior_data, aes(x = theta, y = density)) +
   labs(title = 'Posterior Distribution for Theta', x = 'Theta', y = 'Density') +
   theme_minimal()
 
-# Display the plot
 print(posterior_plot)

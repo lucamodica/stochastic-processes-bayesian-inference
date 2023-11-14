@@ -1,5 +1,6 @@
-# Load required library for numerical integration
+# Load required libraries
 library(stats)
+library(MCMCpack)
 
 # Observed data
 data <- c(0.66, 2.30, 1.98, 1.49, 0.62)
@@ -16,41 +17,36 @@ beta_post <- beta_prior + sum(data^2)
 likelihood_weibull <- function(x, theta) {
   kappa <- 2
   lambda <- sqrt(theta)  # lambda is the square root of theta
-  return((kappa / lambda) * (x / lambda)^(kappa - 1) * exp(-(x / lambda)^kappa))
+  return(dweibull(x, shape = kappa, scale = lambda))
 }
-
 
 # Define the density function for the inverse gamma posterior
 posterior_inv_gamma <- function(theta, alpha, beta) {
-  # Ensure that theta is a scalar
-  if (!is.numeric(theta) || length(theta) != 1) {
-    stop("Theta should be a scalar.")
-  }
-  # Calculate the posterior density
-  return((beta^alpha) / gamma(alpha) * theta^(-alpha - 1) * exp(-beta / theta))
+  return(dinvgamma(theta, shape = alpha, scale = beta))
 }
 
 # Define the integrand for the posterior predictive distribution
-posterior_predictive <- function(x, alpha, beta) {
-  integrand <- function(theta) {
-    likelihood_weibull(x, theta) * posterior_inv_gamma(theta, alpha, beta)
-  }
-  # Ensure that integrate function receives a scalar by using Vectorize
-  return(integrate(Vectorize(integrand), lower = 0, upper = Inf)$value)
+posterior_predictive <- function(x) {
+  theta <- 1  # Since theta is fixed at 1 in the posterior predictive function
+  likelihood <- likelihood_weibull(x, theta)
+  posterior <- posterior_inv_gamma(theta, alpha_post, beta_post)
+  normalization <- posterior_inv_gamma(theta, alpha_post + 1, beta_post + x^2)
+  
+  return (likelihood * posterior / normalization)
 }
 
 # Calculate the probability P(1 < X6 < 2 | x) using numerical integration
-prob_1_to_2 <- function(alpha, beta) {
+prob_1_to_2 <- function() {
   # We integrate over the range x = 1 to x = 2
   integrand <- function(x) {
-    posterior_predictive(x, alpha, beta)
+    posterior_predictive(x)
   }
   # The integrate function should now correctly receive a scalar from integrand
   integrate(Vectorize(integrand), lower = 1, upper = 2)$value
 }
 
 # Calculate the probability
-probability <- prob_1_to_2(alpha_post, beta_post)
+probability <- prob_1_to_2()
 
 # Print the result
 print(paste("P(1 < X6 < 2 | x) =", probability))
