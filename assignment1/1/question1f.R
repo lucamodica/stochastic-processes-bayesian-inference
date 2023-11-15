@@ -9,22 +9,20 @@ b <- 5
 theta_values <- seq(a, b, length.out = 1000)
 prior <- dunif(theta_values, min = a, max = b)
 
-# Compute the Weibull likelihood
+# Weibull likelihood func
 likelihood_weibull <- function(x, theta) {
   if (theta <= 0) return(0)
   lambda <- sqrt(theta)
   return(dweibull(x, shape = kappa, scale = lambda))
 }
 
-# Compute the posterior
+# compute and normalize the posterior
 posterior <- sapply(theta_values, function(theta) {
   prod(sapply(data, likelihood_weibull, theta = theta))
 }) * prior
-
-# Normalize the posterior
 posterior <- posterior / sum(posterior * diff(theta_values[1:2]))
 
-# Define the posterior predictive distribution function
+# posterior predictive distribution func
 posterior_predictive <- function(x_new, theta_values, posterior) {
   sapply(x_new, function(x) {
     sum(sapply(theta_values, likelihood_weibull, x = x) * posterior * diff(theta_values[1:2]))
@@ -32,7 +30,7 @@ posterior_predictive <- function(x_new, theta_values, posterior) {
 }
 
 # Compute P(1 < X6 < 2 | x) using numerical integration
-result <- integrate(function(x) posterior_predictive(x, theta_values, posterior), lower = 1, upper = 2)
-
-# Output the result
-result
+result <- integrate(
+  function(x) posterior_predictive(x, theta_values, posterior), lower = 1, upper = 2
+)
+print(paste("P(1 < X6 < 2 | x) =", result$value))
