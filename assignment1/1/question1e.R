@@ -28,6 +28,6 @@ posterior <- posterior / sum(posterior * diff(theta_values[1:2]))
 posterior_df <- data.frame(theta = theta_values, posterior = posterior)
 plot = ggplot(posterior_df, aes(x = theta, y = posterior)) +
   geom_line() +
-  labs(title = "Posterior distribution for θ", x = expression(theta), y = "Density") +
+  labs(title = "Posterior distribution for theta", x = expression(theta), y = "Density") +
   theme_minimal()
 print(plot)
