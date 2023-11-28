@@ -126,7 +126,7 @@ simulate3 <- function() {
   
   # Parameters for the Dirichlet posterior for each row of P
   # Replace this with your actual parameters obtained from part (a)
-  dirichlet_parameters <- list(c(2, 4, 4), c(4, 2, 4), c(3, 4, 2)) 
+  dirichlet_parameters <- list(c(1, 3, 3), c(3, 1, 3), c(2, 3, 1)) 
   
   # Sample a transition matrix P from the posterior
   sampled_transition_matrix <- t(sapply(dirichlet_parameters, rdirichlet, n = 1))
