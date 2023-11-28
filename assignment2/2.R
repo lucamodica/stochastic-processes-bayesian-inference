@@ -1,3 +1,6 @@
+if (!require(ggplot2)) install.packages("ggplot2")
+library(ggplot2)
+
 # function to simulate a branching process 
 # with Poisson offspring distribution
 branch <- function(n, lam) { 
@@ -19,14 +22,38 @@ posterior_Z0_Z4 <- function(lam) {
   return (posterior_lambda(lam, c(1, 1, 2, 5, 7)));
 };
 
-# question 2b: the extintion probability
+
+lambda_values <- seq(0, 3, length.out = 1000)
+
+posterior_densities = posterior_Z0_Z4(lambda_values)
+
+
+# Plot the posterior distribution
+df <- data.frame(lambda = lambda_values, density = posterior_densities)
+ggplot(df, aes(x = lambda, y = density)) +
+  geom_line() +
+  labs(title = "Posterior Distribution of λ",
+       x = expression(lambda),
+       y = "Density") +
+  theme_minimal()
+
+
+# question 2b: the extinction probability
 extinction_prob <- function(lam) {
+  # Define the PGF for the Poisson distribution
   pgf <- function(s) { exp(lam * (s - 1)) }
   
-  # Use optimize the minimize the function (the extinction
-  # probability is the smallest fixed point of the pgf)
-  prob <- optimize(pgf, c(0, 1))$minimum;
+  # Define the function to find a root for (pgf(s) - s)
+  f_to_minimize <- function(s) { pgf(s) - s }
   
-  return(prob);
+  # Use uniroot to find the root of the function on the interval [0, 1]
+  # The root is the fixed point which corresponds to the extinction probability
+  root <- uniroot(f_to_minimize, c(0, 1), tol = .Machine$double.eps^0.5)$root
+  
+  return(root)
 }
+
+extinction_prob(0.9)
+
+
 
