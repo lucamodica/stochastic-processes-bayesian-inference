@@ -46,14 +46,25 @@ extinction_prob <- function(lam) {
   # Define the function to find a root for (pgf(s) - s)
   f_to_minimize <- function(s) { pgf(s) - s }
   
+  # Choose the interval to search for a root
+  interval <- if (lam <= 1) c(0, 1) else c(0, 0.999)
+  
   # Use uniroot to find the root of the function on the interval [0, 1]
   # The root is the fixed point which corresponds to the extinction probability
-  root <- uniroot(f_to_minimize, c(0, 1), tol = .Machine$double.eps^0.5)$root
+  root <- uniroot(f_to_minimize, interval)$root;
   
   return(root)
 }
 
-extinction_prob(0.9)
+# simulation of extintion probability
+# for a branching process with Poisson offspring distribution
+# and parameter lambda
+extinction_prob_simulation <- function(n_sims, gens, lam) {
+  simlist <- replicate(n_sims, branch(gens,lam)[11]);
+  return (sum(simlist==0)/n_sims);
+}
 
+print(extinction_prob(5));
+print(extinction_prob_simulation(1000, 10, 5))
 
 
