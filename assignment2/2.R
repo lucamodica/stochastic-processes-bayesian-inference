@@ -69,8 +69,12 @@ cat("Probability of extinction, using simulations: ", extinction_prob_simulation
 
 
 # question 2e: maximum likelihood estimation of lambda
+# (using the observed data)
+likelihood_data_Z0_Z4 <- function(lam) {
+  return (prod(dpois(data_Z0_Z4, lam)));
+}
 maximum_likelihood_lambda <- function(data) {
-  return (optimize(Vectorize(function(lam) { posterior_lambda(lam, data) }), c(0, 100), maximum = TRUE)$maximum);
+  return (optimize(Vectorize(likelihood_data_Z0_Z4), c(0, 100), maximum = TRUE)$maximum);
 }
 cat("Maximum likelihood estimate of lambda: ", maximum_likelihood_lambda(data_Z0_Z4), "\n");
 cat("Probability of extinction, using maximum likelihood estimate: ", extinction_prob(maximum_likelihood_lambda(data_Z0_Z4)), "\n");
