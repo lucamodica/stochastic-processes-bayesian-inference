@@ -1,4 +1,6 @@
 
+data <- read.table("dataAssignment3.txt", header = TRUE)
+
 #b)
 
 log_posterior <- function(theta1, theta2, theta3, data) {
@@ -16,8 +18,8 @@ log_posterior <- function(theta1, theta2, theta3, data) {
   epsilon <- 1e-8  # Small constant to prevent log(0)
   
   likelihoods <- sapply(1:length(x), function(i) {
-    f <- exp(exp(theta1) * x[i] + exp(theta2) * (y[i] - theta3)^2) / 
-      (1 + exp(exp(theta1) * x[i] + exp(theta2) * (y[i] - theta3)^2))
+    f <- (exp(exp(theta1) * x[i] + exp(theta2) * (y[i] - theta3)^2) - 1) / 
+      (exp(exp(theta1) * x[i] + exp(theta2) * (y[i] - theta3)^2) + 1)
     z[i] * log(f + epsilon) + (1 - z[i]) * log(1 - f + epsilon)
   })
   
@@ -35,6 +37,28 @@ log_posterior <- function(theta1, theta2, theta3, data) {
 
 
 #c)
+
+# Read the data into R
+data <- read.table("dataAssignment3.txt", header = TRUE)
+
+# Calculate mean, standard deviation, and range for each column
+mean_x <- mean(data$x)
+std_dev_x <- sd(data$x)
+range_x <- range(data$x)
+
+mean_y <- mean(data$y)
+std_dev_y <- sd(data$y)
+range_y <- range(data$y)
+
+mean_z <- mean(data$z)
+# For binary variable z, standard deviation and range may be less informative
+range_z <- range(data$z)
+
+# Print the calculated values
+print(paste("Mean of x:", mean_x, "Standard Deviation of x:", std_dev_x, "Range of x:", paste(range_x, collapse = " to ")))
+print(paste("Mean of y:", mean_y, "Standard Deviation of y:", std_dev_y, "Range of y:", paste(range_y, collapse = " to ")))
+print(paste("Mean of z:", mean_z, "Range of z:", paste(range_z, collapse = " to ")))
+
 
 mcmc <- function(start_values, data, iterations = 10000) {
   current_theta <- start_values
@@ -64,8 +88,7 @@ mcmc <- function(start_values, data, iterations = 10000) {
 }
 
 # Example usage
-start_values <- c(0, 0, 17.22) # Replace with your starting values
-data <- read.table("dataAssignment3.txt", header = TRUE)
+start_values <- c(0.1, 0, 17.22) # Replace with your starting values
 chain <- mcmc(start_values, data)
 
 
@@ -94,8 +117,8 @@ theta3_mean <- theta_mean[3]
 
 # Probability function
 f <- function(x, y, theta1, theta2, theta3) {
-  exp(exp(theta1) * x + exp(theta2) * (y - theta3)^2) / 
-    (1 + exp(exp(theta1) * x + exp(theta2) * (y - theta3)^2))
+  (exp(exp(theta1) * x + exp(theta2) * (y - theta3)^2) - 1) / 
+    (exp(exp(theta1) * x + exp(theta2) * (y - theta3)^2) + 1)
 }
 
 # Compute the probability for one animal
