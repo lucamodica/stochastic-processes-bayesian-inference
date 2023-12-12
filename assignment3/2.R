@@ -3,9 +3,9 @@
 prob_2b <- function() {
   total_prob <- 0
   lambda_full <- 36
-  lambda_small <- 0.4^2 * lambda_full
+  lambda_area <- 0.4^2 * lambda_full
   lambda_overlap <- 0.2^2 * lambda_full
-  lambda_non_overlap <- lambda_small - lambda_overlap
+  lambda_non_overlap <- lambda_area - lambda_overlap
 
   for (i in 0:4) {
     prob_overlap <- dpois(i, lambda_overlap)
@@ -43,7 +43,7 @@ spatial_poisson_sim(36, 10000)
 spatial_poisson_sim_posterior <- function(trials) {
   # Update the posterior parameters based on the observed data
   alpha_post <- 0 + 36  # 36 trees observed
-  beta_post <- 0 + 1     # Assuming the observation is for a unit area
+  beta_post <- 0 + 1 
   simlist <- numeric(trials)
   
   for (i in 1:trials) {
@@ -66,8 +66,8 @@ spatial_poisson_sim_posterior(10000)
 
 # question 2e: simulation from Z
 compute_Z <- function() {
-  alpha_post <- 0 + 36  # 36 trees observed
-  beta_post <- 0 + 1     # Assuming the observation is for a unit area
+  alpha_post <- 0 + 36 
+  beta_post <- 0 + 1 
   l <- rgamma(1, shape = alpha_post, rate = beta_post)
   n <- rpois(1, l)
   x <- runif(n, 0, 1)
@@ -80,17 +80,31 @@ compute_Z <- function() {
       distances[i, j] <- sqrt((x[i] - x[j])^2 + (y[i] - y[j])^2)
     }
   }
+  
   # Exclude self-distances (which are 0) by setting them to Inf
   diag(distances) <- Inf
   return (mean(apply(distances, 1, min)))
 }
 
 simulation_Z <- function(trials) {
-  # Repeat the above process many times to get a distribution of Z
   Z_values <- replicate(trials, compute_Z())
-  print("Mean of the distances: ")
-  print(mean(Z_values))
   hist(Z_values, main="Histogram of Z values", xlab="Z")
+  
+  # check if 0.1358 is an outlier
+  Z_values = sort(Z_values)
+  value <- 0.1358
+  
+  # Check if a value is an outlier
+  is_outlier <- function(value, arr) {
+    n <- length(arr)
+    q1 <- arr[floor(n/4)]
+    q3 <- arr[ceiling(3*n/4)]
+    iqr <- q3 - q1
+    return(value < (q1 - 1.5 * iqr) | value > (q3 + 1.5 * iqr))
+  }
+  
+  outlier <- is_outlier(value, Z_values)
+  print(paste("Is", value, "an outlier?", outlier))
 }
 simulation_Z(10000)
 
