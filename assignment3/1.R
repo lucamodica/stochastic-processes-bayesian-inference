@@ -1,10 +1,9 @@
 
-data <- read.table("dataAssignment3.txt", header = TRUE)
+data <- read.table("./dataAssignment3.txt", header = TRUE)
 
 #b)
 
 log_posterior <- function(theta1, theta2, theta3, data) {
-  # Extract the data columns
   x <- data[,1]
   y <- data[,2]
   z <- data[,3]
@@ -15,8 +14,7 @@ log_posterior <- function(theta1, theta2, theta3, data) {
   # log(f^z[i])) = z[i] * log(f)
   # log((1 - f)^(1 - z[i])) = (1 - z[i]) * log(1 - f)
   
-  epsilon <- 1e-8  # Small constant to prevent log(0)
-  
+  epsilon <- 1e-8  # Small constant to prevent log(0) 
   likelihoods <- sapply(1:length(x), function(i) {
     f <- (exp(exp(theta1) * x[i] + exp(theta2) * (y[i] - theta3)^2) - 1) / 
       (exp(exp(theta1) * x[i] + exp(theta2) * (y[i] - theta3)^2) + 1)
@@ -26,19 +24,12 @@ log_posterior <- function(theta1, theta2, theta3, data) {
   # the product of the likelihoods of each observation log(a*b*...*N)
   # is equivalent to the sum of the log of each observation's likelihood
   # log(a) + log(b) + ... + log(N)
-  
-  # Sum the log likelihoods
-  sum_likelihoods <- sum(likelihoods)
-  
-  # Return the sum (since the prior is flat, the posterior is proportional to the likelihood)
-  return(sum_likelihoods)
+  return(sum(likelihoods))
 }
 
 
 
 #c)
-
-# Read the data into R
 data <- read.table("dataAssignment3.txt", header = TRUE)
 
 # Calculate mean, standard deviation, and range for each column
@@ -106,7 +97,6 @@ plot(chain[, 3], type = "l", col = "green", xlab = "Iteration", ylab = "Theta3",
 
 
 # d)
-
 # Assuming 'chain' contains your MCMC samples
 theta_mean <- colMeans(chain)
 
